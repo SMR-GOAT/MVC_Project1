@@ -1,0 +1,26 @@
+@model IEnumerable<MVCCourse.ViewModels.UserViewModel>
+
+<div class="container mt-4">
+    <h2>قائمة المستخدمين</h2>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>الاسم الكامل</th>
+                <th>اسم المستخدم (SMR)</th>
+                <th>البريد الإلكتروني</th>
+                <th>رقم الجوال</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.FullName</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@user.PhoneNumber</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

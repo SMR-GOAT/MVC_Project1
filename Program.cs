@@ -1,7 +1,12 @@
+using MVCCourse.Validations; // هذا المجلد اللي فيه الـ LoginValidator حقك
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity; // تعديل جديد: لاستيراد أدوات الحماية
 using MVCCourse.Data;
 using MVCCourse.Models;
+using FluentValidation;
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +26,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
 }).AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>(); 
 
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
 
 var app = builder.Build();
 

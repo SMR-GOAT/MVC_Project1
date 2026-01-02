@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using MVCCourse.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MVCCourse.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     public IActionResult Index()

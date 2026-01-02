@@ -1,0 +1,35 @@
+
+@model MVCCourse.ViewModels.LoginViewModel
+@{
+    Layout = null; // كذا الصفحة بتطلع بيضاء سادة بدون الـ Navbar حق الموقع
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>تسجيل الدخول - SMR</title>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-4 card p-4 shadow">
+                <h3 class="text-center">تسجيل الدخول</h3>
+                <form asp-action="Login" method="post">
+                    <div class="mb-3">
+                        <label>اسم المستخدم</label>
+                        <input asp-for="UserName" class="form-control" />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label>كلمة المرور</label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">دخول</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
