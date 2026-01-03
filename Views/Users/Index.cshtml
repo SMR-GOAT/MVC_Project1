@@ -1,26 +1,107 @@
 @model IEnumerable<MVCCourse.ViewModels.UserViewModel>
 
-<div class="container mt-4">
-    <h2>قائمة المستخدمين</h2>
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>الاسم الكامل</th>
-                <th>اسم المستخدم (SMR)</th>
-                <th>البريد الإلكتروني</th>
-                <th>رقم الجوال</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model)
-            {
-                <tr>
-                    <td>@user.FullName</td>
-                    <td>@user.UserName</td>
-                    <td>@user.Email</td>
-                    <td>@user.PhoneNumber</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="container-fluid mt-5 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">User Management</h2>
+            <p class="text-muted">Manage all system users, their roles, and contact information.</p>
+        </div>
+        <button class="btn btn-primary shadow-sm">
+            <i class="bi bi-person-plus-fill me-2"></i>Add New User
+        </button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase fs-7 text-muted fw-bold">Full Name</th>
+                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold">Username (SMR)</th>
+                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold">Email Address</th>
+                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold">Phone Number</th>
+                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-3 bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold">
+                                            @user.FullName.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <span class="fw-semibold text-dark">@user.FullName</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-normal py-2 px-3">
+                                        @@@user.UserName
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="mailto:@user.Email" class="text-decoration-none text-muted">
+                                        <i class="bi bi-envelope me-2"></i>@user.Email
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="text-muted">
+                                        <i class="bi bi-telephone me-2"></i>@user.PhoneNumber
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-icon border-0" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow border-0">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    body { background-color: #f8f9fa; }
+    
+    /* Table Styling */
+    .fs-7 { font-size: 0.75rem; }
+    .bg-soft-primary { background-color: #e7f1ff; }
+    .avatar-sm { width: 35px; height: 35px; font-size: 0.85rem; }
+    
+    .table thead th {
+        border-bottom: 1px solid #edf2f9;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s;
+    }
+
+    .table tbody tr:hover {
+        background-color: #fbfcfe;
+    }
+
+    /* Action Button Styles */
+    .btn-icon {
+        padding: 0.25rem 0.5rem;
+        color: #adb5bd;
+    }
+    .btn-icon:hover {
+        color: #6c757d;
+        background-color: #f8f9fa;
+    }
+</style>

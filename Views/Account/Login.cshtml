@@ -8,25 +8,25 @@
 <html>
 <head>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <title>تسجيل الدخول - SMR</title>
+    <title>SMR Login</title>
 </head>
-<body class="bg-light">
+<body class="bg-light vh-100 d-flex align-items-center">
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-4 card p-4 shadow">
-                <h3 class="text-center">تسجيل الدخول</h3>
+                <h3 class="text-center">Login</h3>
                 <form asp-action="Login" method="post">
                     <div class="mb-3">
-                        <label>اسم المستخدم</label>
+                        <label>UserName</label>
                         <input asp-for="UserName" class="form-control" />
                         <span asp-validation-for="UserName" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
-                        <label>كلمة المرور</label>
+                        <label>Password</label>
                         <input asp-for="Password" type="password" class="form-control" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">دخول</button>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
                 </form>
             </div>
         </div>

@@ -1,38 +1,48 @@
-using MVCCourse.Validations; // هذا المجلد اللي فيه الـ LoginValidator حقك
+using MVCCourse.Validations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity; // تعديل جديد: لاستيراد أدوات الحماية
+using Microsoft.AspNetCore.Identity;
 using MVCCourse.Data;
 using MVCCourse.Models;
 using FluentValidation;
-
-
-
+using FluentValidation.AspNetCore; // تأكد من وجود هذه المكتبة
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. قسم الخدمات (الأدوات) ---
+// --- 1. SERVICES SECTION ---
 
+// إضافة الـ Controllers مع تفعيل الـ FluentValidation التلقائي
 builder.Services.AddControllersWithViews();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// إضافة FluentValidation (الربط التلقائي)
+builder.Services.AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
 
+// إعداد قاعدة البيانات (PostgreSQL)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// --- (تعديل جديد هنا) ---
-// إضافة نظام الهوية (الحارس) وربطه بمخزن البيانات الخاص بك
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
-    options.SignIn.RequireConfirmedAccount = false; 
-}).AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>(); 
+// إعداد نظام الهوية (Identity)
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = false; // تسهيلاً لك في البداية
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+// إعداد الـ AutoMapper (الطريقة الصحيحة لـ .NET 8)
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
+// إعداد الـ Razor Pages (مطلوب لـ Identity UI إذا كنت تستخدمها)
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// --- 2. قسم خط التشغيل (الأمان والمرور) ---
+// --- 2. MIDDLEWARE PIPELINE (THE ORDER MATTERS!) ---
 
 if (!app.Environment.IsDevelopment())
 {
@@ -41,23 +51,21 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // مهم جداً لتحميل ملفات الـ CSS والـ JS
+
 app.UseRouting();
 
-// --- (تعديل جديد هنا) ---
-// يجب أن نسأل الزائر: "من أنت؟" (Authentication) قبل أن نسأله "ماذا مسموح لك أن تفعل؟" (Authorization)
-app.UseAuthentication(); 
-
-app.UseAuthorization();
-
-app.MapStaticAssets();
+// الترتيب هنا "حياة أو موت" للكود
+app.UseAuthentication(); // من أنت؟
+app.UseAuthorization();  // ماذا يمكنك أن تفعل؟
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
-// أضف هذا السطر أيضاً ليدعم صفحات الدخول الجاهزة التي يوفرها النظام
-app.MapRazorPages(); 
+app.MapRazorPages();
+
+// --- 3. DATABASE MIGRATION & SEED DATA ---
 
 using (var scope = app.Services.CreateScope())
 {
@@ -65,19 +73,21 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
+        // تنفيذ الـ Migrations تلقائياً عند التشغيل
         await context.Database.MigrateAsync(); 
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        
-        // التعديل هنا: يجب طلب ApplicationUser وليس IdentityUser
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         
-        // الآن نمررهم للميثود
+        // استدعاء بيانات البداية (Admins, Employees, Customers)
         await DbInitializer.SeedData(roleManager, userManager);
+        
+        Console.WriteLine("Database synchronized and seeded successfully!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error: {ex.Message}");
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
 
