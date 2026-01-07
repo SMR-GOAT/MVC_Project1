@@ -5,7 +5,7 @@ using System.Reflection; // مهم لاستخدام ApplyConfigurationsFromAssem
 
 namespace MVCCourse.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUserModel>
     {
         public DbSet<Item> Items { get; set; }
 

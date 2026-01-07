@@ -1,0 +1,40 @@
+/* تحسين شكل الـ Card */
+.card {
+    transition: transform 0.3s ease;
+}
+
+/* رسائل الخطأ الصغيرة */
+.extra-small {
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 4px;
+    display: block;
+}
+
+/* حركات تفاعلية للحقول */
+.input-group:focus-within .input-group-text {
+    background-color: #e9ecef !important;
+    color: #0d6efd !important;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    background-color: #fff !important;
+    border: 1px solid #0d6efd !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important;
+}
+
+/* تنسيق الأزرار */
+.btn-primary {
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3) !important;
+}
+
+/* Header Gradient - اختياري لزيادة الفخامة */
+.card-header.bg-primary {
+    background: linear-gradient(45deg, #0d6efd, #0043a8) !important;
+}

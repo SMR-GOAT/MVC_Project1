@@ -4,9 +4,9 @@ using MVCCourse.Models;
 
 namespace MVCCourse.Data.Configurations
 {
-    public class ApplicationUserConfiguration : IEntityTypeConfiguration<ApplicationUser>
+    public class ApplicationUserConfiguration : IEntityTypeConfiguration<ApplicationUserModel>
     {
-        public void Configure(EntityTypeBuilder<ApplicationUser> builder)
+        public void Configure(EntityTypeBuilder<ApplicationUserModel> builder)
         {
             // 1. قيد الاسم الأول
             builder.Property(u => u.FirstName)
@@ -20,9 +20,12 @@ namespace MVCCourse.Data.Configurations
                 .HasMaxLength(50)         // أقصى حد 50 حرف
                 .HasColumnType("varchar(50)");
 
-            // 3. قيد اختياري لربط رقم الجوال (إذا أردت جعله فريداً أو إلزامياً)
-            builder.Property(u => u.PhoneNumber)
-                .HasMaxLength(10);        // تحديد طول رقم الجوال
+            builder.Property(u => u.Salary)
+                .HasColumnType("decimal(18,2)") // تحديد النوع بدقة (18 خانة، 2 بعد الفاصلة)
+                .HasDefaultValue(0);            // القيمة الافتراضية 0
+
+            builder.Property(u => u.Address)
+                .HasMaxLength(200);              // أقصى حد 200 حرف
         }
     }
 }

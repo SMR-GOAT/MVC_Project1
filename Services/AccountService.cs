@@ -7,9 +7,9 @@ namespace MVCCourse.Services;
 
 public class AccountService : IAccountService
 {
-    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly SignInManager<ApplicationUserModel> _signInManager;
 
-    public AccountService(SignInManager<ApplicationUser> signInManager)
+    public AccountService(SignInManager<ApplicationUserModel> signInManager)
     {
         _signInManager = signInManager;
     }

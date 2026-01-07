@@ -1,31 +1,36 @@
-@model IEnumerable<MVCCourse.ViewModels.UserViewModel>
+@model IEnumerable<MVCCourse.ViewModels.UserListViewModel>
 
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "User Management";
+}
+
+@section Styles {
+    @* التأكد من استخدام link لملفات الـ CSS *@
+    <link rel="stylesheet" href="~/css/User/Index.css" asp-append-version="true" />
 }
 
 <div class="container-fluid mt-5 px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">User Management</h2>
-            <p class="text-muted">Manage all system users, their roles, and contact information.</p>
+            <p class="text-muted small">Overview of system administrators and staff members.</p>
         </div>
-        <button class="btn btn-primary shadow-sm">
+        <a asp-action="Create" class="btn btn-primary shadow-sm px-4 rounded-pill fw-bold">
             <i class="bi bi-person-plus-fill me-2"></i>Add New User
-        </button>
+        </a>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4 py-3 text-uppercase fs-7 text-muted fw-bold">Full Name</th>
-                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold">Username (SMR)</th>
-                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold">Email Address</th>
-                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold">Phone Number</th>
-                            <th class="py-3 text-uppercase fs-7 text-muted fw-bold text-center">Actions</th>
+                        <tr class="text-dark">
+                            <th class="ps-4 py-3 text-uppercase fs-7 fw-bold border-0">User Info</th>
+                            <th class="py-3 text-uppercase fs-7 fw-bold border-0">System Role</th>
+                            <th class="py-3 text-uppercase fs-7 fw-bold border-0">Contact Details</th>
+                            <th class="py-3 text-uppercase fs-7 fw-bold border-0">Annual Salary</th>
+                            <th class="py-3 text-uppercase fs-7 fw-bold text-center border-0">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,36 +39,56 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-sm me-3 bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold">
+                                        <div class="avatar-sm me-3 rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm @(user.Role == "SuperAdmin" ? "bg-gold-gradient text-white" : "bg-primary text-white")" 
+                                             style="width: 45px; height: 45px; font-size: 1.1rem;">
                                             @user.FullName.Substring(0, 1).ToUpper()
                                         </div>
-                                        <span class="fw-semibold text-dark">@user.FullName</span>
+                                        <div>
+                                            <span class="fw-bold text-dark d-block mb-0">@user.FullName</span>
+                                            <span class="badge bg-light text-muted border-0 p-0" style="font-size: 0.75rem;">@@@user.UserName</span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-dark border fw-normal py-2 px-3">
-                                        @@@user.UserName
-                                    </span>
+                                    @if (user.Role == "SuperAdmin")
+                                    {
+                                        <span class="badge badge-fakhama shadow-sm">
+                                            <i class="bi bi-crown-fill me-1"></i> SUPER ADMIN
+                                        </span>
+                                    }
+                                    else if (user.Role == "Admin")
+                                    {
+                                        <span class="badge badge-admin shadow-sm">
+                                            <i class="bi bi-shield-lock-fill me-1"></i> ADMIN
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-secondary border px-3 rounded-pill">
+                                            @user.Role
+                                        </span>
+                                    }
                                 </td>
                                 <td>
-                                    <a href="mailto:@user.Email" class="text-decoration-none text-muted">
-                                        <i class="bi bi-envelope me-2"></i>@user.Email
-                                    </a>
+                                    <div class="d-flex flex-column gap-1">
+                                        <small class="text-dark fw-medium"><i class="bi bi-envelope-at me-2 text-primary"></i>@user.Email</small>
+                                        <small class="text-muted"><i class="bi bi-phone me-2"></i>@user.PhoneNumber</small>
+                                    </div>
                                 </td>
                                 <td>
-                                    <span class="text-muted">
-                                        <i class="bi bi-telephone me-2"></i>@user.PhoneNumber
-                                    </span>
+                                    <div class="fw-bold text-dark">
+                                        @user.Salary.ToString("N0") <span class="text-muted fw-normal small">SAR</span>
+                                    </div>
                                 </td>
                                 <td class="text-center">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-icon border-0" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots-vertical"></i>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-action-edit shadow-sm" title="Edit User">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        @* تأكد أن دالة confirmDelete موجودة في ملف Index.js *@
+                                        <button type="button" class="btn btn-action-delete shadow-sm" onclick="confirmDelete('@user.Id')" title="Delete User">
+                                            <i class="bi bi-trash3"></i>
                                         </button>
-                                        <ul class="dropdown-menu shadow border-0">
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Edit</a></li>
-                                            <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Delete</a></li>
-                                        </ul>
                                     </div>
                                 </td>
                             </tr>
@@ -75,33 +100,7 @@
     </div>
 </div>
 
-<style>
-    body { background-color: #f8f9fa; }
-    
-    /* Table Styling */
-    .fs-7 { font-size: 0.75rem; }
-    .bg-soft-primary { background-color: #e7f1ff; }
-    .avatar-sm { width: 35px; height: 35px; font-size: 0.85rem; }
-    
-    .table thead th {
-        border-bottom: 1px solid #edf2f9;
-    }
-
-    .table tbody tr {
-        transition: all 0.2s;
-    }
-
-    .table tbody tr:hover {
-        background-color: #fbfcfe;
-    }
-
-    /* Action Button Styles */
-    .btn-icon {
-        padding: 0.25rem 0.5rem;
-        color: #adb5bd;
-    }
-    .btn-icon:hover {
-        color: #6c757d;
-        background-color: #f8f9fa;
-    }
-</style>
+@section Scripts {
+    @* استدعاء ملف الجافاسكريبت الصحيح للمجلد الجديد *@
+    <script src="~/js/User/Index.js" asp-append-version="true"></script>
+}

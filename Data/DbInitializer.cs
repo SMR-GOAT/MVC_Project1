@@ -4,10 +4,10 @@ using MVCCourse.Models;
 public static class DbInitializer
 {
     // التعديل هنا: غيرنا IdentityUser إلى ApplicationUser
-    public static async Task SeedData(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+    public static async Task SeedData(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUserModel> userManager)
     {
         // 1. إضافة الرتب (تبقى كما هي لأن الرتب لم تتغير)
-        string[] roleNames = { "Admin", "Employee", "Customer" };
+        string[] roleNames = { "SuperAdmin","Admin", "Employee", "Customer" };
         foreach (var roleName in roleNames)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
@@ -22,13 +22,13 @@ public static class DbInitializer
         var user = await userManager.FindByEmailAsync(adminEmail);
         if (user == null)
         {
-            var newAdmin = new ApplicationUser // استخدام الكلاس الجديد حقك
+            var newAdmin = new ApplicationUserModel // استخدام الكلاس الجديد حقك
             {
                 UserName = "SMR",
                 Email = adminEmail,
                 FirstName = "smeer",      
                 LastName = "ali",      
-                PhoneNumber = "0500000000", 
+                PhoneNumber = "0550563839", 
                 EmailConfirmed = true
             };
             
@@ -38,7 +38,7 @@ public static class DbInitializer
             if (result.Succeeded)
             {
                 // ربط المستخدم برتبة Admin
-                await userManager.AddToRoleAsync(newAdmin, "Admin");
+                await userManager.AddToRoleAsync(newAdmin, "SuperAdmin");
             }
         }
     }

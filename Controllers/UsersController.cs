@@ -1,33 +1,62 @@
-using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MVCCourse.Models;
+using MVCCourse.Services.Interfaces;
 using MVCCourse.ViewModels;
 
 namespace MVCCourse.Controllers
 {
-    // [Authorize(Roles = "Admin")] // فك التعليق لاحقاً لتأمين الصفحة
+    [Authorize(Roles = "SuperAdmin")] 
     public class UsersController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public UsersController(UserManager<ApplicationUser> userManager, IMapper mapper)
+        public UsersController(IUserService userService)
         {
-            _userManager = userManager;
-            _mapper = mapper;
+            _userService = userService;
         }
 
+        // 1. عرض جدول المستخدمين
         public async Task<IActionResult> Index()
         {
-            // جلب كل المستخدمين من قاعدة البيانات
-            var users = await _userManager.Users.ToListAsync();
-            
-            // تحويل القائمة من ApplicationUser إلى UserViewModel
-            var userList = _mapper.Map<List<UserViewModel>>(users);
-            
+            var userList = await _userService.GetAllUsersWithRolesAsync();
             return View(userList);
+        }
+
+        // 2. عرض صفحة إضافة مستخدم جديد (GET)
+        [HttpGet]
+        public IActionResult Create()
+        {
+            // نرجع الفيو فاضي عشان اليوزر يعبي البيانات
+            return View();
+        }
+
+        // 3. استقبال بيانات المستخدم الجديد ومعالجتها (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken] // حماية من هجمات CSRF
+        public async Task<IActionResult> Create(CreateUserViewModel model)
+        {
+            // إذا الفاليديشن (FluentValidation) فيه أخطاء
+            if (!ModelState.IsValid)
+            {
+                // نرجعه لنفس الصفحة (صفحة Create) مع عرض الأخطاء
+                // الـ Tag Helpers (asp-for) بتمسك الأخطاء تلقائياً
+                return View(model);
+            }
+
+            try 
+            {
+                // حفظ المستخدم في قاعدة البيانات
+                await _userService.CreateUserAsync(model);
+                
+                // بعد النجاح نرجعه للجدول الرئيسي
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // في حال حدث خطأ تقني غير متوقع
+                ModelState.AddModelError("", "Something went wrong: " + ex.Message);
+                return View(model);
+            }
         }
     }
 }

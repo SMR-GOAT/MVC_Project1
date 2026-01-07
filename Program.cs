@@ -5,7 +5,8 @@ using MVCCourse.Data;
 using MVCCourse.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using MVCCourse.Services; // تأكد من وجود هذه المكتبة
+using MVCCourse.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,37 +15,43 @@ var builder = WebApplication.CreateBuilder(args);
 // إضافة الـ Controllers مع تفعيل الـ FluentValidation التلقائي
 builder.Services.AddControllersWithViews();
 
-// إضافة FluentValidation (الربط التلقائي)
+// إعداد FluentValidation
 builder.Services.AddFluentValidationAutoValidation()
                 .AddFluentValidationClientsideAdapters();
-builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
 
 // إعداد قاعدة البيانات (PostgreSQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// إعداد نظام الهوية (Identity)
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+// إعداد نظام الهوية (Identity) - تم ضبطها لتطابق قيود الـ Validator
+builder.Services.AddIdentity<ApplicationUserModel, IdentityRole>(options => {
     options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = false; // تسهيلاً لك في البداية
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
+    options.User.RequireUniqueEmail = true; // ضمان عدم تكرار الإيميل
+    
+    // إعدادات كلمة المرور (Password Complexity)
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// إعداد الـ AutoMapper (الطريقة الصحيحة لـ .NET 8)
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+// إعداد الـ AutoMapper (تحديد ملف الـ Profile بدقة)
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// تسجيل خدمات التطبيق (Custom Services) - استدعاء واحد فقط
 builder.Services.AddApplicationServices();
 
-// إعداد الـ Razor Pages (مطلوب لـ Identity UI إذا كنت تستخدمها)
+// إعداد الـ Razor Pages (مطلوب لـ Identity)
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// --- 2. MIDDLEWARE PIPELINE (THE ORDER MATTERS!) ---
+// --- 2. MIDDLEWARE PIPELINE ---
 
 if (!app.Environment.IsDevelopment())
 {
@@ -53,13 +60,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // مهم جداً لتحميل ملفات الـ CSS والـ JS
+app.UseStaticFiles(); // لتحميل ملفات الـ CSS والـ JS
 
 app.UseRouting();
 
-// الترتيب هنا "حياة أو موت" للكود
-app.UseAuthentication(); // من أنت؟
-app.UseAuthorization();  // ماذا يمكنك أن تفعل؟
+// الترتيب الحساس للأمان
+app.UseAuthentication(); // التحقق من الهوية
+app.UseAuthorization();  // التحقق من الصلاحيات
 
 app.MapControllerRoute(
     name: "default",
@@ -75,21 +82,20 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        // تنفيذ الـ Migrations تلقائياً عند التشغيل
         await context.Database.MigrateAsync(); 
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUserModel>>();
         
-        // استدعاء بيانات البداية (Admins, Employees, Customers)
+        // استدعاء بيانات البداية
         await DbInitializer.SeedData(roleManager, userManager);
         
-        Console.WriteLine("Database synchronized and seeded successfully!");
+        Console.WriteLine("System is ready and database is synchronized!");
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        logger.LogError(ex, "An error occurred during startup.");
     }
 }
 
