@@ -15,7 +15,24 @@ namespace MVCCourse.Controllers
             _userService = userService;
         }
 
-        // 1. عرض جدول المستخدمين
+        
+[HttpPost]
+public async Task<IActionResult> Delete(string id)
+{
+    try 
+    {
+        await _userService.DeleteUserAsync(id);
+        
+        // Success message in English
+        return Json(new { success = true, message = "User has been deleted successfully." });
+    }
+    catch (Exception ex)
+    {
+        // The message here will be the English exception from the Service 
+        // (e.g., "User not found" or "SuperAdmin cannot be deleted")
+        return Json(new { success = false, message = ex.Message });
+    }
+}      // 1. عرض جدول المستخدمين
         public async Task<IActionResult> Index()
         {
             var userList = await _userService.GetAllUsersWithRolesAsync();
@@ -58,5 +75,36 @@ namespace MVCCourse.Controllers
                 return View(model);
             }
         }
+
+[HttpGet]
+public async Task<IActionResult> Edit(string id)
+{
+    if (id == null) return NotFound();
+
+    var model = await _userService.GetUserForEditAsync(id);
+    
+    if (model == null) return NotFound();
+
+    return View(model);
+}
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Edit(EditUserViewModel model)
+{
+    if (!ModelState.IsValid) return View(model);
+
+    try {
+        await _userService.UpdateUserAsync(model);
+        return RedirectToAction(nameof(Index));
+    } catch (Exception ex) {
+        ModelState.AddModelError("", ex.Message);
+        return View(model);
     }
+}
+    }
+
+    
+
+    
 }

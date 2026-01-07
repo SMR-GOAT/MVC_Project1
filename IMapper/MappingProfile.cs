@@ -18,7 +18,6 @@ public class MappingProfile : Profile
             // نتجاهل الـ PasswordHash لأن Identity سيقوم بتشفير الباسورد ووضعه يدوياً
             .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
             
-        // --- 3. خرائط أخرى مستقبلاً ---
-        // CreateMap<Item, ItemDTO>();
+      CreateMap<EditUserViewModel, ApplicationUserModel>().ReverseMap();
     }
 }
